@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main style="padding-top:var(--nav-h)">
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-user">
+        <div style="width:48px;height:48px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#000;margin-bottom:0.75rem" id="avatar-initials">?</div>
+        <h3 id="sidebar-name">Loading...</h3>
+        <p id="sidebar-email">—</p>
+      </div>
+      <nav class="dashboard-nav">
+        <a href="#" class="active" onclick="showSection('overview',this)"><i class="fa-solid fa-chart-pie"></i> Overview</a>
+        <a href="#" onclick="showSection('orders',this)"><i class="fa-solid fa-bag-shopping"></i> Order History</a>
+        <a href="#" onclick="showSection('bookings',this)"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+        <a href="#" onclick="showSection('profile',this)"><i class="fa-solid fa-user-pen"></i> My Profile</a>
+        <hr class="divider" style="margin:0.5rem 1.5rem">
+        <a href="#" onclick="Auth.logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+
+      <!-- Overview -->
+      <div class="dash-section active" id="sec-overview">
+        <h2>My Dashboard</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem">
+          <div class="card card-body" style="text-align:center">
+            <i class="fa-solid fa-bag-shopping" style="color:var(--gold);font-size:1.5rem;margin-bottom:0.5rem"></i>
+            <h3 id="stat-orders" style="font-size:1.5rem">0</h3>
+            <p style="font-size:0.8rem">Total Orders</p>
+          </div>
+          <div class="card card-body" style="text-align:center">
+            <i class="fa-solid fa-calendar-check" style="color:var(--gold);font-size:1.5rem;margin-bottom:0.5rem"></i>
+            <h3 id="stat-bookings" style="font-size:1.5rem">0</h3>
+            <p style="font-size:0.8rem">Appointments</p>
+          </div>
+          <div class="card card-body" style="text-align:center">
+            <i class="fa-solid fa-dollar-sign" style="color:var(--gold);font-size:1.5rem;margin-bottom:0.5rem"></i>
+            <h3 id="stat-spent" style="font-size:1.5rem">$0</h3>
+            <p style="font-size:0.8rem">Total Spent</p>
+          </div>
+        </div>
+
+        <h3 style="font-size:0.9rem;margin-bottom:1rem;color:var(--text-muted)">Recent Orders</h3>
+        <div id="overview-orders"></div>
+      </div>
+
+      <!-- Orders -->
+      <div class="dash-section" id="sec-orders">
+        <h2>Order History</h2>
+        <div id="orders-list"></div>
+      </div>
+
+      <!-- Bookings -->
+      <div class="dash-section" id="sec-bookings">
+        <h2>My Appointments</h2>
+        <div id="bookings-list"></div>
+      </div>
+
+      <!-- Profile -->
+      <div class="dash-section" id="sec-profile">
+        <h2>My Profile</h2>
+        <div class="card" style="max-width:500px">
+          <div class="card-body">
+            <div class="form-group"><label>Full Name</label><input type="text" id="pf-name" class="form-control"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="pf-email" class="form-control" readonly style="opacity:0.6"></div>
+            <div class="form-group"><label>Phone</label><input type="tel" id="pf-phone" class="form-control"></div>
+            <div class="form-group"><label>Address</label><input type="text" id="pf-address" class="form-control" placeholder="Your delivery address"></div>
+            <button class="btn btn-primary" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  Auth.requireAuth();
+  renderNavbar('');
+
+  const user = Auth.getUser();
+
+  // Set sidebar
+  document.getElementById('sidebar-name').textContent = user.fullName;
+  document.getElementById('sidebar-email').textContent = user.email;
+  const initials = user.fullName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('avatar-initials').textContent = initials;
+
+  // Fill profile
+  document.getElementById('pf-name').value = user.fullName;
+  document.getElementById('pf-email').value = user.email;
+  document.getElementById('pf-phone').value = user.phone || '';
+  document.getElementById('pf-address').value = user.address || '';
+
+  // Load data
+  const myOrders = Orders.getByUser(user.id).reverse();
+  const myBookings = Bookings.getByUser(user.id).reverse();
+
+  // Stats
+  document.getElementById('stat-orders').textContent = myOrders.length;
+  document.getElementById('stat-bookings').textContent = myBookings.length;
+  document.getElementById('stat-spent').textContent = fmt(myOrders.reduce((s, o) => s + o.total, 0));
+
+  // Overview recent orders
+  const ovEl = document.getElementById('overview-orders');
+  if (myOrders.length === 0) {
+    ovEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bag-shopping"></i><h3>No orders yet</h3><p>Your order history will appear here.</p><a href="products.html" class="btn btn-outline" style="margin-top:1rem"><i class="fa-solid fa-store"></i> Shop Now</a></div>';
+  } else {
+    ovEl.innerHTML = myOrders.slice(0, 3).map(o => orderCard(o)).join('');
+  }
+
+  // All orders
+  const ordEl = document.getElementById('orders-list');
+  ordEl.innerHTML = myOrders.length === 0
+    ? '<div class="empty-state"><i class="fa-solid fa-bag-shopping"></i><h3>No orders yet</h3></div>'
+    : myOrders.map(o => orderCard(o)).join('');
+
+  // Bookings
+  const bkEl = document.getElementById('bookings-list');
+  bkEl.innerHTML = myBookings.length === 0
+    ? '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><h3>No appointments yet</h3><p>Book your first session today.</p><a href="booking.html" class="btn btn-outline" style="margin-top:1rem"><i class="fa-solid fa-calendar-check"></i> Book Now</a></div>'
+    : myBookings.map(b => `
+      <div class="order-history-card">
+        <div class="order-history-header">
+          <div>
+            <span class="order-id">${b.bookingId}</span>
+            <span class="order-date" style="margin-left:1rem">${b.date} at ${b.time}</span>
+          </div>
+          <span class="badge badge-success">${b.status}</span>
+        </div>
+        <div style="font-size:0.875rem">
+          <span><i class="fa-solid fa-scissors" style="color:var(--gold);margin-right:0.4rem"></i>${b.service}</span>
+          &nbsp;&bull;&nbsp;
+          <span><i class="fa-solid fa-user-tie" style="color:var(--gold);margin-right:0.4rem"></i>${b.stylist}</span>
+          &nbsp;&bull;&nbsp;
+          <span style="color:var(--gold);font-weight:700">${fmt(b.price)}</span>
+        </div>
+      </div>`).join('');
+
+  function orderCard(o) {
+    return `
+    <div class="order-history-card">
+      <div class="order-history-header">
+        <div>
+          <span class="order-id">${o.orderId}</span>
+          <span class="order-date" style="margin-left:1rem">${fmtDate(o.createdAt)}</span>
+        </div>
+        <span class="badge ${o.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${o.status}</span>
+      </div>
+      <div style="font-size:0.875rem;margin-bottom:0.75rem">
+        ${o.items.map(i => `<span>${i.name} ×${i.qty}</span>`).join(' &bull; ')}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:700;color:var(--gold)">${fmt(o.total)}</span>
+        <a href="order-tracking.html?id=${o.orderId}" class="btn btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.75rem">
+          <i class="fa-solid fa-truck"></i> Track
+        </a>
+      </div>
+    </div>`;
+  }
+
+  function showSection(id, el) {
+    document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-'+id).classList.add('active');
+    document.querySelectorAll('.dashboard-nav a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function saveProfile() {
+    const users = Users.get();
+    const idx = users.findIndex(u => u.id === user.id);
+    if (idx > -1) {
+      users[idx].fullName = document.getElementById('pf-name').value.trim();
+      users[idx].phone = document.getElementById('pf-phone').value.trim();
+      users[idx].address = document.getElementById('pf-address').value.trim();
+      Users.save(users);
+      Auth.login(users[idx]);
+      showToast('<i class="fa-solid fa-circle-check"></i> Profile saved!');
+    }
+  }
+</script>
+</body>
+</html>

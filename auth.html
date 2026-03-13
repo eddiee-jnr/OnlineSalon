@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Register — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main style="padding-top:0">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">Glow<span>Haven</span></div>
+      <p>Premium Men's Barbershop</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form class="auth-form active" id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label><i class="fa-solid fa-envelope"></i> Email</label>
+          <input type="email" id="login-email" class="form-control" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem">
+          <i class="fa-solid fa-right-to-bracket"></i> Login
+        </button>
+        <p id="login-error" style="color:var(--danger);font-size:0.8rem;margin-top:0.75rem;display:none"></p>
+      </form>
+
+      <!-- Register Form -->
+      <form class="auth-form" id="form-register" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label><i class="fa-solid fa-user"></i> Full Name</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="James Mensah" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-envelope"></i> Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-phone"></i> Phone</label>
+          <input type="tel" id="reg-phone" class="form-control" placeholder="0244 000 000" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="reg-pass" class="form-control" placeholder="Min. 6 characters" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+        <p id="reg-error" style="color:var(--danger);font-size:0.8rem;margin-top:0.75rem;display:none"></p>
+      </form>
+
+      <div class="auth-footer">
+        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  // Redirect if already logged in
+  if (Auth.isLoggedIn()) {
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = params.get('next') || 'dashboard.html';
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+    document.getElementById('form-login').classList.toggle('active', tab === 'login');
+    document.getElementById('form-register').classList.toggle('active', tab === 'register');
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    const user = Users.findByEmail(email);
+    const err = document.getElementById('login-error');
+    if (!user || user.password !== pass) {
+      err.textContent = 'Incorrect email or password.';
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    Auth.login(user);
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = params.get('next') || 'dashboard.html';
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+    const email = document.getElementById('reg-email').value;
+    const err = document.getElementById('reg-error');
+    if (Users.findByEmail(email)) {
+      err.textContent = 'An account with this email already exists.';
+      err.style.display = 'block';
+      return;
+    }
+    const user = Users.register({
+      fullName: document.getElementById('reg-name').value,
+      email,
+      phone: document.getElementById('reg-phone').value,
+      password: document.getElementById('reg-pass').value
+    });
+    Auth.login(user);
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = params.get('next') || 'dashboard.html';
+  }
+
+  // Pre-fill tab from URL param
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tab') === 'register') switchTab('register');
+</script>
+</body>
+</html>

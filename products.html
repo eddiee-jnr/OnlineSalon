@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/home.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ---- Bundles ---- */
+    .bundles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .bundle-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      transition: border-color 0.2s;
+    }
+    .bundle-card:hover { border-color: var(--gold); }
+    .bundle-img {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      background: #fff;
+    }
+    .bundle-info { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .bundle-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+    }
+    .bundle-name { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+    .bundle-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+    .bundle-items-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.25rem; }
+    .bundle-item-pill {
+      font-size: 0.7rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.15rem 0.6rem;
+      color: var(--text-muted);
+    }
+    .bundle-price-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+    .bundle-price { font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    .bundle-original { font-size: 0.85rem; color: var(--text-muted); text-decoration: line-through; }
+    .bundle-save {
+      font-size: 0.7rem;
+      background: rgba(200,164,90,0.15);
+      color: var(--gold);
+      border-radius: 20px;
+      padding: 0.15rem 0.5rem;
+      font-weight: 600;
+    }
+
+    /* ---- Build Your Own Kit ---- */
+    .byo-section {
+      background: var(--surface);
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 2rem;
+    }
+    .byo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .byo-header h2 { font-size: 1.4rem; }
+    .byo-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .byo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .byo-item {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      user-select: none;
+      position: relative;
+    }
+    .byo-item:hover { border-color: var(--gold); }
+    .byo-item.selected { border-color: var(--gold); background: rgba(200,164,90,0.08); }
+    .byo-item img {
+      width: 60px; height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin: 0 auto 0.5rem;
+      background: #fff;
+    }
+    .byo-item-name { font-size: 0.75rem; font-weight: 600; line-height: 1.3; color: var(--text); }
+    .byo-item-price { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .byo-check {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #000;
+      font-size: 0.6rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .byo-item.selected .byo-check { display: flex; }
+    .byo-summary {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .byo-summary-info { flex: 1; }
+    .byo-summary-info p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .byo-summary-prices { display: flex; align-items: baseline; gap: 0.75rem; }
+    .byo-total { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+    .byo-original { font-size: 0.9rem; color: var(--text-muted); text-decoration: line-through; }
+    .byo-discount-badge {
+      background: var(--gold);
+      color: #000;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div class="page-hero">
+    <span class="section-label">Men's Grooming Store</span>
+    <h1>Shop Products</h1>
+    <p>Premium grooming products for the modern man.</p>
+  </div>
+
+
+  <!--INDIVIDUAL PRODUCTS-->
+  <section class="section" style="padding-top:1rem;background:var(--surface);border-top:1px solid var(--border)">
+    <div class="container">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
+        <!-- Filter Panel -->
+        <aside class="filter-panel" style="min-width:180px;flex-shrink:0">
+          <h3><i class="fa-solid fa-sliders"></i> Filter</h3>
+          <div style="margin-bottom:1.5rem">
+            <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem;color:var(--text-muted)">Category</p>
+            <label class="filter-option active"><input type="radio" name="cat" value=""> All</label>
+            <label class="filter-option"><input type="radio" name="cat" value="Styling"> Styling</label>
+            <label class="filter-option"><input type="radio" name="cat" value="Beard Care"> Beard Care</label>
+            <label class="filter-option"><input type="radio" name="cat" value="Hair Care"> Hair Care</label>
+            <label class="filter-option"><input type="radio" name="cat" value="Shaving"> Shaving</label>
+            <label class="filter-option"><input type="radio" name="cat" value="Skincare"> Skincare</label>
+          </div>
+          <hr class="divider">
+          <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;color:var(--text-muted)">Sort By</p>
+          <select class="sort-select" id="sort-select">
+            <option value="default">Default</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </aside>
+
+        <!-- Product Grid -->
+        <div style="flex:1;min-width:0">
+          <div class="catalog-header">
+            <h2>Individual Products</h2>
+            <span class="result-count" id="result-count"></span>
+          </div>
+          <div class="products-grid" id="catalog-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--KITS & BUNDLES-->
+  <section class="section" style="padding-bottom:2rem">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem">
+        <div>
+          <span class="section-label">Save More Together</span>
+          <h2>Grooming Kits & Bundles</h2>
+        </div>
+        <span class="badge badge-gold"><i class="fa-solid fa-tag"></i> Bundle & Save</span>
+      </div>
+
+      <!-- Pre-made bundles -->
+      <div class="bundles-grid" id="bundles-grid"></div>
+
+      <!-- Build Your Own -->
+      <div class="byo-section" style="margin-top:1.5rem">
+        <div class="byo-header">
+          <div>
+            <h2><i class="fa-solid fa-wrench" style="color:var(--gold);font-size:1.1rem"></i> Build Your Own Kit</h2>
+            <p class="byo-subtitle">Pick any 3+ products and automatically get <strong style="color:var(--gold)">15% off</strong> your custom bundle.</p>
+          </div>
+          <span class="badge badge-gold" id="byo-count-badge" style="display:none">0 selected</span>
+        </div>
+
+        <div class="byo-grid" id="byo-grid"></div>
+
+        <div class="byo-summary">
+          <div class="byo-summary-info">
+            <p id="byo-status-text"><i class="fa-solid fa-circle-info"></i> Select at least 3 products to unlock the 15% bundle discount.</p>
+            <div class="byo-summary-prices" id="byo-prices" style="display:none">
+              <span class="byo-total" id="byo-total">$0.00</span>
+              <span class="byo-original" id="byo-original">$0.00</span>
+              <span class="byo-discount-badge">15% OFF</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="byo-add-btn" disabled onclick="addBundleToCart()" style="opacity:0.5">
+            <i class="fa-solid fa-bag-shopping"></i> Add Kit to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  renderNavbar('products');
+  renderFooter();
+
+  const products = JSON.parse(localStorage.getItem('products') || '[]');
+
+  // ---- Pre-made Bundles ----
+  const bundlesEl = document.getElementById('bundles-grid');
+  GH_BUNDLES.forEach(b => {
+    const bundleItems = b.items.map(id => products.find(p => p.id === id)).filter(Boolean);
+    const saving = (b.originalPrice - b.bundlePrice).toFixed(2);
+    bundlesEl.innerHTML += `
+    <div class="bundle-card">
+      <img class="bundle-img" src="${b.image}" alt="${b.name}" onerror="this.style.background='var(--surface2)'">
+      <div class="bundle-info">
+        <span class="bundle-tag"><i class="fa-solid fa-fire"></i> ${b.tag}</span>
+        <p class="bundle-name">${b.name}</p>
+        <p class="bundle-desc">${b.description}</p>
+        <div class="bundle-items-list">
+          ${bundleItems.map(p => `<span class="bundle-item-pill">${p.name.split(' ')[0]} ${p.name.split(' ')[1] || ''}</span>`).join('')}
+        </div>
+        <div class="bundle-price-row">
+          <span class="bundle-price">${fmt(b.bundlePrice)}</span>
+          <span class="bundle-original">${fmt(b.originalPrice)}</span>
+          <span class="bundle-save">Save ${fmt(saving)}</span>
+        </div>
+        <button class="btn btn-primary" style="margin-top:0.5rem;font-size:0.8rem;padding:0.5rem 1rem" onclick="addBundleKit('${b.id}')">
+          <i class="fa-solid fa-bag-shopping"></i> Add Kit to Cart
+        </button>
+      </div>
+    </div>`;
+  });
+
+  function addBundleKit(bundleId) {
+    const bundle = GH_BUNDLES.find(b => b.id === bundleId);
+    if (!bundle) return;
+    Cart.add({
+      id: bundle.id,
+      name: bundle.name,
+      price: bundle.bundlePrice,
+      image: bundle.image,
+      category: 'Bundle Kit',
+      isBundle: true,
+      bundleItems: bundle.items
+    }, 1);
+  }
+
+  // ---- Build Your Own Kit ----
+  const byoGrid = document.getElementById('byo-grid');
+  let selectedIds = new Set();
+
+  products.forEach(p => {
+    byoGrid.innerHTML += `
+    <div class="byo-item" id="byo-${p.id}" onclick="toggleByo('${p.id}', ${p.price})">
+      <div class="byo-check"><i class="fa-solid fa-check"></i></div>
+      <img src="${p.image}" alt="${p.name}" onerror="this.style.background='var(--surface2)'">
+      <p class="byo-item-name">${p.name}</p>
+      <p class="byo-item-price">${fmt(p.price)}</p>
+    </div>`;
+  });
+
+  function toggleByo(id) {
+    if (selectedIds.has(id)) selectedIds.delete(id);
+    else selectedIds.add(id);
+    document.getElementById('byo-'+id).classList.toggle('selected', selectedIds.has(id));
+    updateByoSummary();
+  }
+
+  function updateByoSummary() {
+    const count = selectedIds.size;
+    const badge = document.getElementById('byo-count-badge');
+    const btn = document.getElementById('byo-add-btn');
+    const pricesEl = document.getElementById('byo-prices');
+    const statusEl = document.getElementById('byo-status-text');
+
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+    badge.textContent = `${count} selected`;
+
+    if (count < 3) {
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> Select at least 3 products to unlock the 15% bundle discount. (${3 - count} more needed)`;
+      pricesEl.style.display = 'none';
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+    } else {
+      const selectedProducts = [...selectedIds].map(id => products.find(p => p.id === id)).filter(Boolean);
+      const original = selectedProducts.reduce((s, p) => s + p.price, 0);
+      const discounted = original * 0.85;
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> ${count} products selected — 15% discount applied!`;
+      document.getElementById('byo-total').textContent = fmt(discounted);
+      document.getElementById('byo-original').textContent = fmt(original);
+      pricesEl.style.display = 'flex';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  }
+
+  function addBundleToCart() {
+    const selectedProducts = [...selectedIds].map(id => products.find(p => p.id === id)).filter(Boolean);
+    const original = selectedProducts.reduce((s, p) => s + p.price, 0);
+    const discounted = parseFloat((original * 0.85).toFixed(2));
+    Cart.add({
+      id: 'BYO-' + Date.now(),
+      name: `Custom Kit (${selectedProducts.length} items)`,
+      price: discounted,
+      image: selectedProducts[0].image,
+      category: 'Build Your Own Kit',
+      isBundle: true
+    }, 1);
+    // Reset
+    selectedIds.clear();
+    document.querySelectorAll('.byo-item').forEach(el => el.classList.remove('selected'));
+    updateByoSummary();
+  }
+
+  // ---- Individual Products Catalog ----
+  let activeCategory = '';
+  let activeSort = 'default';
+
+  function renderCatalog() {
+    let prods = [...products];
+    if (activeCategory) prods = prods.filter(p => p.category === activeCategory);
+    if (activeSort === 'price-asc') prods.sort((a, b) => a.price - b.price);
+    else if (activeSort === 'price-desc') prods.sort((a, b) => b.price - a.price);
+    else if (activeSort === 'name') prods.sort((a, b) => a.name.localeCompare(b.name));
+
+    document.getElementById('result-count').textContent = `${prods.length} product${prods.length !== 1 ? 's' : ''}`;
+    document.getElementById('catalog-grid').innerHTML = prods.map(p => `
+      <div class="product-card">
+        <img class="product-img" src="${p.image}" alt="${p.name}" onerror="this.style.background='var(--surface2)'">
+        <div class="product-info">
+          <p class="product-cat">${p.category}</p>
+          <h3 class="product-name">${p.name}</h3>
+          <p class="product-price">${fmt(p.price)}</p>
+          <div class="product-actions">
+            <a href="product-detail.html?id=${p.id}" class="btn btn-ghost"><i class="fa-solid fa-eye"></i></a>
+            <button class="btn btn-primary" onclick="Cart.add({id:'${p.id}',name:'${p.name}',price:${p.price},image:'${p.image}',category:'${p.category}'})">
+              <i class="fa-solid fa-bag-shopping"></i> Add
+            </button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  document.querySelectorAll('input[name="cat"]').forEach(radio => {
+    radio.addEventListener('change', e => {
+      activeCategory = e.target.value;
+      document.querySelectorAll('.filter-option').forEach(el => el.classList.remove('active'));
+      e.target.closest('.filter-option').classList.add('active');
+      renderCatalog();
+    });
+  });
+  document.getElementById('sort-select').addEventListener('change', e => {
+    activeSort = e.target.value;
+    renderCatalog();
+  });
+
+  renderCatalog();
+</script>
+</body>
+</html>

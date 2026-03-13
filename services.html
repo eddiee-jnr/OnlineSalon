@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/home.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+  <div class="page-hero">
+    <span class="section-label">What We Offer</span>
+    <h1>Our Services</h1>
+    <p>Professional men's grooming by expert hands. Book your session today.</p>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="services-grid" id="services-grid"></div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="section" style="background:var(--surface);border-top:1px solid var(--border)">
+    <div class="container">
+      <div class="section-header" style="text-align:center;max-width:500px;margin:0 auto 2.5rem">
+        <span class="section-label">Our Promise</span>
+        <h2>Why Choose GlowHaven</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem">
+        <div style="text-align:center;padding:1.5rem">
+          <i class="fa-solid fa-medal" style="font-size:2rem;color:var(--gold);margin-bottom:1rem"></i>
+          <h3 style="font-size:1rem;margin-bottom:0.5rem">Expert Stylists</h3>
+          <p style="font-size:0.85rem">Trained professionals with 5–10 years of hands-on experience.</p>
+        </div>
+        <div style="text-align:center;padding:1.5rem">
+          <i class="fa-solid fa-clock" style="font-size:2rem;color:var(--gold);margin-bottom:1rem"></i>
+          <h3 style="font-size:1rem;margin-bottom:0.5rem">No Waiting</h3>
+          <p style="font-size:0.85rem">Book your exact time slot. We respect your schedule.</p>
+        </div>
+        <div style="text-align:center;padding:1.5rem">
+          <i class="fa-solid fa-shield-halved" style="font-size:2rem;color:var(--gold);margin-bottom:1rem"></i>
+          <h3 style="font-size:1rem;margin-bottom:0.5rem">Premium Products</h3>
+          <p style="font-size:0.85rem">We only use high-grade grooming products during every service.</p>
+        </div>
+        <div style="text-align:center;padding:1.5rem">
+          <i class="fa-solid fa-star" style="font-size:2rem;color:var(--gold);margin-bottom:1rem"></i>
+          <h3 style="font-size:1rem;margin-bottom:0.5rem">5-Star Rated</h3>
+          <p style="font-size:0.85rem">Our clients keep coming back. Over 500 satisfied customers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  renderNavbar('services');
+  renderFooter();
+
+  const icons = ['fa-scissors','fa-wand-magic-sparkles','fa-user-tie','fa-razor','fa-leaf','fa-gift'];
+  const grid = document.getElementById('services-grid');
+  GH_SERVICES.forEach((s, i) => {
+    grid.innerHTML += `
+    <div class="service-card">
+      <div class="service-icon"><i class="fa-solid ${icons[i]}"></i></div>
+      <h3>${s.name}</h3>
+      <p>${s.description}</p>
+      <div class="service-meta">
+        <span class="service-price">${fmt(s.price)}</span>
+        <span class="service-duration"><i class="fa-regular fa-clock"></i> ${s.duration}</span>
+      </div>
+      <a href="booking.html?service=${s.id}" class="btn btn-outline" style="width:100%;margin-top:1rem;justify-content:center">
+        <i class="fa-solid fa-calendar-check"></i> Book This Service
+      </a>
+    </div>`;
+  });
+</script>
+</body>
+</html>

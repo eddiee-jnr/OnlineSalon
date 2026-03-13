@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlowHaven — Premium Men's Barbershop</title>
+  <meta name="description" content="Book your appointment or shop premium men's grooming products at GlowHaven — Accra's premier men's barbershop.">
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/home.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-media">
+      <img src="assets/images/main-banner.jpg" alt="GlowHaven Hero" class="active">
+      <video src="assets/images/vid-banner.mp4" autoplay muted loop playsinline></video>
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <span class="section-label">Premium Men's Grooming</span>
+      <h1>Look Sharp.<br><span>Book Smart.</span></h1>
+      <p>Accra's finest barbershop — now with online appointment booking and a full men's grooming store.</p>
+      <div class="hero-btns">
+        <a href="booking.html" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Book Appointment</a>
+        <a href="products.html" class="btn btn-outline"><i class="fa-solid fa-bag-shopping"></i> Shop Products</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stat-item"><h3>300+</h3><p>Happy Clients</p></div>
+      <div class="stat-item"><h3>6</h3><p>Services Available</p></div>
+      <div class="stat-item"><h3>3</h3><p>Expert Stylists</p></div>
+      <div class="stat-item"><h3>8+</h3><p>Years of Experience</p></div>
+    </div>
+  </div>
+
+  <!-- Services -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div>
+          <span class="section-label">What We Offer</span>
+          <h2>Our Services</h2>
+        </div>
+        <a href="services.html" class="btn btn-ghost" style="font-size:0.8rem">View All <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+      <div class="services-grid" id="services-preview"></div>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section class="section" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div>
+          <span class="section-label">Men's Grooming</span>
+          <h2>Shop Products</h2>
+        </div>
+        <a href="products.html" class="btn btn-ghost" style="font-size:0.8rem">View All <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+      <div class="products-grid" id="products-preview"></div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter-section">
+    <span class="section-label">Stay in the Loop</span>
+    <h2>Get Grooming Tips & Offers</h2>
+    <p>Subscribe and be the first to know about promotions and new products.</p>
+    <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+      <input type="email" placeholder="Your email address" required id="nl-email">
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Subscribe</button>
+    </form>
+  </section>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/home.js"></script>
+<script>
+  renderNavbar('home');
+  renderFooter();
+
+  // Render first 3 services
+  const servicesEl = document.getElementById('services-preview');
+  const icons = ['fa-scissors','fa-wand-magic-sparkles','fa-user-tie','fa-razor','fa-leaf','fa-gift'];
+  GH_SERVICES.slice(0, 3).forEach((s, i) => {
+    servicesEl.innerHTML += `
+    <div class="service-card">
+      <div class="service-icon"><i class="fa-solid ${icons[i]}"></i></div>
+      <h3>${s.name}</h3>
+      <p>${s.description}</p>
+      <div class="service-meta">
+        <span class="service-price">${fmt(s.price)}</span>
+        <span class="service-duration"><i class="fa-regular fa-clock"></i> ${s.duration}</span>
+      </div>
+      <a href="booking.html?service=${s.id}" class="btn btn-outline" style="width:100%;margin-top:1rem;justify-content:center">
+        <i class="fa-solid fa-calendar-check"></i> Book Now
+      </a>
+    </div>`;
+  });
+
+  // Render first 4 products
+  const productsEl = document.getElementById('products-preview');
+  const prods = JSON.parse(localStorage.getItem('products') || '[]');
+  prods.slice(0, 4).forEach(p => {
+    productsEl.innerHTML += `
+    <div class="product-card">
+      <img class="product-img" src="${p.image}" alt="${p.name}" onerror="this.style.background='var(--surface2)'">
+      <div class="product-info">
+        <p class="product-cat">${p.category}</p>
+        <h3 class="product-name">${p.name}</h3>
+        <p class="product-price">${fmt(p.price)}</p>
+        <div class="product-actions">
+          <a href="product-detail.html?id=${p.id}" class="btn btn-ghost"><i class="fa-solid fa-eye"></i></a>
+          <button class="btn btn-primary" onclick="Cart.add({id:'${p.id}',name:'${p.name}',price:${p.price},image:'${p.image}',category:'${p.category}'})">
+            <i class="fa-solid fa-bag-shopping"></i> Add
+          </button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  function handleNewsletter(e) {
+    e.preventDefault();
+    showToast('<i class="fa-solid fa-circle-check"></i> Subscribed! Thanks for joining.');
+    document.getElementById('nl-email').value = '';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Tracking — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+  <div class="page-hero">
+    <span class="section-label">Track Your Order</span>
+    <h1>Order Tracking</h1>
+    <p>Enter your Order ID to see real-time status updates.</p>
+  </div>
+
+  <div class="tracking-container">
+    <div class="tracking-search">
+      <input type="text" id="order-id-input" class="form-control" placeholder="e.g. ORD-AB1C2D">
+      <button class="btn btn-primary" onclick="trackOrder()"><i class="fa-solid fa-magnifying-glass"></i> Track</button>
+    </div>
+
+    <div id="tracking-result"></div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  Auth.requireAuth();
+  renderNavbar('');
+  renderFooter();
+
+  // Pre-fill from URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('id')) {
+    document.getElementById('order-id-input').value = params.get('id');
+    trackOrder();
+  }
+
+  function trackOrder() {
+    const id = document.getElementById('order-id-input').value.trim().toUpperCase();
+    const resultEl = document.getElementById('tracking-result');
+    if (!id) {
+      resultEl.innerHTML = '<p style="color:var(--danger);font-size:0.85rem"><i class="fa-solid fa-triangle-exclamation"></i> Please enter an Order ID.</p>';
+      return;
+    }
+
+    const order = Orders.getById(id);
+    if (!order) {
+      resultEl.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-circle-xmark"></i>
+          <h3>Order Not Found</h3>
+          <p>No order found with ID <strong>${id}</strong>. Please check and try again.</p>
+        </div>`;
+      return;
+    }
+
+    const statusSteps = ['Order Placed','Processing','Shipped','Delivered'];
+    const currentIdx = statusSteps.indexOf(order.status);
+
+    resultEl.innerHTML = `
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+            <div>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem">Order ID</p>
+              <h3 style="font-size:1.1rem">${order.orderId}</h3>
+            </div>
+            <span class="badge ${order.status === 'Delivered' ? 'badge-success' : 'badge-warning'}">${order.status}</span>
+          </div>
+          <hr class="divider">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.85rem">
+            <div><p style="margin-bottom:0.15rem;color:var(--text-muted)">Customer</p><p style="color:var(--text)">${order.customerName}</p></div>
+            <div><p style="margin-bottom:0.15rem;color:var(--text-muted)">Order Date</p><p style="color:var(--text)">${fmtDate(order.createdAt)}</p></div>
+            <div><p style="margin-bottom:0.15rem;color:var(--text-muted)">Total</p><p style="color:var(--gold);font-weight:700">${fmt(order.total)}</p></div>
+            <div><p style="margin-bottom:0.15rem;color:var(--text-muted)">Payment</p><p style="color:var(--text)">${order.paymentMethod}</p></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:1.5rem;font-weight:600">
+        <i class="fa-solid fa-truck"></i> Delivery Progress
+      </h3>
+
+      <div class="timeline-steps">
+        ${statusSteps.map((step, i) => `
+          <div class="timeline-step" style="margin-bottom:1.75rem">
+            <div class="timeline-dot ${i < currentIdx ? 'done' : i === currentIdx ? 'current' : ''}">
+              ${i < currentIdx ? '<i class="fa-solid fa-check"></i>' : `<span>${i+1}</span>`}
+            </div>
+            <div class="timeline-info" style="padding-top:4px">
+              <h4 style="${i === currentIdx ? 'color:var(--gold)' : ''}">${step}</h4>
+              <p>${getStepDesc(step, i <= currentIdx)}</p>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card-body">
+          <h4 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:1rem;font-weight:600">
+            <i class="fa-solid fa-box"></i> Items Ordered
+          </h4>
+          ${order.items.map(i => `
+            <div class="checkout-item-row">
+              <span>${i.name} × ${i.qty}</span>
+              <span>${fmt(i.price * i.qty)}</span>
+            </div>`).join('')}
+          <div class="summary-row total" style="margin-top:0.75rem">
+            <span>Total Paid</span><span>${fmt(order.total)}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function getStepDesc(step, done) {
+    const descs = {
+      'Order Placed': 'Your order has been received.',
+      'Processing': 'We are preparing your items.',
+      'Shipped': 'Your order is on its way.',
+      'Delivered': 'Your order has been delivered.'
+    };
+    return done ? descs[step] : 'Pending';
+  }
+</script>
+</body>
+</html>

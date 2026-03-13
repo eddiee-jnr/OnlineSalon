@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="styles/booking.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+
+  <!-- Progress Bar -->
+  <div class="bk-progress">
+    <div class="bk-step active" id="step-1">
+      <div class="bk-step-circle">1</div>
+      <span class="bk-step-label">Service</span>
+    </div>
+    <div class="bk-step-line" id="line-1"></div>
+    <div class="bk-step" id="step-2">
+      <div class="bk-step-circle">2</div>
+      <span class="bk-step-label">Barber</span>
+    </div>
+    <div class="bk-step-line" id="line-2"></div>
+    <div class="bk-step" id="step-3">
+      <div class="bk-step-circle">3</div>
+      <span class="bk-step-label">Time</span>
+    </div>
+  </div>
+
+  <div class="bk-layout">
+
+    <!-- LEFT: Booking Form -->
+    <div>
+
+      <!-- Step 1: Service -->
+      <div class="bk-card">
+        <h3><i class="fa-solid fa-scissors"></i> Select a Service</h3>
+        <div class="svc-grid" id="svc-grid"></div>
+      </div>
+
+      <!-- Step 2: Barber -->
+      <div class="bk-card">
+        <h3><i class="fa-solid fa-user-tie"></i> Choose Your Barber</h3>
+        <div class="barber-grid" id="barber-grid"></div>
+      </div>
+
+      <!-- Step 3: Date & Time -->
+      <div class="bk-card">
+        <h3><i class="fa-solid fa-calendar-days"></i> Select Date &amp; Time</h3>
+        <div class="datetime-grid">
+          <!-- Calendar -->
+          <div>
+            <div class="cal-header">
+              <button class="cal-nav-btn" onclick="changeMonth(-1)">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <span id="cal-month-label"></span>
+              <button class="cal-nav-btn" onclick="changeMonth(1)">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+          <!-- Time Slots -->
+          <div>
+            <p class="time-label"><i class="fa-regular fa-clock"></i> Available Times</p>
+            <div class="time-slots" id="time-slots"></div>
+            <p class="no-date-msg" id="no-date-msg">
+              <i class="fa-solid fa-circle-info"></i> Select a date first
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Sticky Summary + Hours -->
+    <div>
+
+      <div class="bk-summary-card">
+        <h3><i class="fa-solid fa-receipt"></i> Booking Summary</h3>
+
+        <div class="bk-sum-row">
+          <p class="bk-sum-label">Service</p>
+          <p class="bk-sum-val muted" id="sum-service">Not selected yet</p>
+        </div>
+        <div class="bk-sum-row">
+          <p class="bk-sum-label">Barber</p>
+          <p class="bk-sum-val muted" id="sum-barber">Not selected yet</p>
+        </div>
+        <div class="bk-sum-row">
+          <p class="bk-sum-label">When</p>
+          <p class="bk-sum-val muted" id="sum-when">Not selected yet</p>
+        </div>
+
+        <div class="bk-sum-divider"></div>
+
+        <div class="bk-sum-total">
+          <span class="bk-sum-total-label">Total</span>
+          <span class="bk-sum-total-price" id="sum-price">—</span>
+        </div>
+
+        <button class="bk-confirm-btn" id="confirm-btn" onclick="submitBooking()">
+          <i class="fa-solid fa-calendar-check"></i> Confirm Booking
+        </button>
+      </div>
+
+      <!-- Opening Hours -->
+      <div class="bk-card">
+        <h3><i class="fa-solid fa-clock"></i> Opening Hours</h3>
+        <div class="bk-card-hours-row">
+          <span>Monday – Friday</span>
+          <span class="hours-gold">9:00 AM – 6:00 PM</span>
+        </div>
+        <div class="bk-card-hours-row">
+          <span>Saturday</span>
+          <span class="hours-gold">9:00 AM – 4:00 PM</span>
+        </div>
+        <div class="bk-card-hours-row">
+          <span>Sunday</span>
+          <span class="hours-muted">Closed</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="booking-modal">
+    <div class="modal-box">
+      <i class="fa-solid fa-circle-check modal-icon"></i>
+      <h2>Booking Confirmed!</h2>
+      <p>Your appointment has been successfully booked. We look forward to seeing you.</p>
+      <div class="order-ref">Booking ID: <strong id="modal-bk-id">—</strong></div>
+      <a href="dashboard.html" class="btn btn-primary btn-full">
+        <i class="fa-solid fa-user"></i> View My Appointments
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/booking.js"></script>
+</body>
+</html>

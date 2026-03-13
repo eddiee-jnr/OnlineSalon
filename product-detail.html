@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/home.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+  <div id="product-detail-content"></div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  renderNavbar('products');
+  renderFooter();
+
+  const params = new URLSearchParams(window.location.search);
+  const pid = params.get('id');
+  const products = JSON.parse(localStorage.getItem('products') || '[]');
+  const p = products.find(x => x.id === pid);
+  const el = document.getElementById('product-detail-content');
+
+  if (!p) {
+    el.innerHTML = `<div class="section"><div class="container" style="text-align:center">
+      <i class="fa-solid fa-circle-exclamation" style="font-size:3rem;color:var(--border);margin-bottom:1rem"></i>
+      <h2>Product not found</h2>
+      <a href="products.html" class="btn btn-outline" style="margin-top:1rem">Back to Shop</a>
+    </div></div>`;
+  } else {
+    document.title = `${p.name} — GlowHaven`;
+    el.innerHTML = `
+    <div class="section">
+      <div class="container" style="margin-bottom:1rem">
+        <a href="products.html" style="font-size:0.85rem;color:var(--text-muted)"><i class="fa-solid fa-arrow-left"></i> Back to Shop</a>
+      </div>
+      <div class="product-detail-grid">
+        <div>
+          <img class="product-detail-img" src="${p.image}" alt="${p.name}" onerror="this.style.background='var(--surface2)'">
+        </div>
+        <div class="product-detail-info">
+          <div>
+            <span class="product-cat">${p.category}</span>
+            <h1>${p.name}</h1>
+          </div>
+          <p class="product-detail-price">${fmt(p.price)}</p>
+          <p style="font-size:0.9rem">${p.description}</p>
+          <div>
+            <label style="font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);display:block;margin-bottom:0.5rem">Quantity</label>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty(-1)"><i class="fa-solid fa-minus"></i></button>
+              <input type="number" class="qty-input" id="qty" value="1" min="1" max="99">
+              <button class="qty-btn" onclick="changeQty(1)"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.75rem">
+            <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="addToCart()">
+              <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+            </button>
+            <a href="cart.html" class="btn btn-outline" style="justify-content:center">
+              <i class="fa-solid fa-arrow-right"></i> View Cart
+            </a>
+          </div>
+          <hr class="divider">
+          <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.85rem">
+            <span><i class="fa-solid fa-truck" style="color:var(--gold);width:20px"></i> Free delivery on orders over $50</span>
+            <span><i class="fa-solid fa-rotate-left" style="color:var(--gold);width:20px"></i> 7-day return policy</span>
+            <span><i class="fa-solid fa-shield-halved" style="color:var(--gold);width:20px"></i> 100% genuine product</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function changeQty(delta) {
+    const inp = document.getElementById('qty');
+    if (!inp) return;
+    const newVal = Math.max(1, parseInt(inp.value) + delta);
+    inp.value = newVal;
+  }
+
+  function addToCart() {
+    const qty = parseInt(document.getElementById('qty')?.value) || 1;
+    Cart.add({id: p.id, name: p.name, price: p.price, image: p.image, category: p.category}, qty);
+  }
+</script>
+</body>
+</html>

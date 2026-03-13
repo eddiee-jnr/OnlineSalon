@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+  <div class="page-hero">
+    <span class="section-label">Get in Touch</span>
+    <h1>Contact & Support</h1>
+    <p>Have questions? We're here to help. Send us a message or visit us in person.</p>
+  </div>
+
+  <div class="contact-grid">
+    <!-- Left: Info & FAQ -->
+    <div>
+      <div class="contact-info" style="margin-bottom:2rem">
+        <h2>GlowHaven</h2>
+        <p style="font-size:0.875rem;margin-bottom:1.5rem">Premium Men's Barbershop — Accra, Ghana</p>
+        <div class="contact-detail">
+          <i class="fa-solid fa-location-dot"></i>
+          <div><h4>Address</h4><p>12 Barima Avenue, Osu, Accra</p></div>
+        </div>
+        <div class="contact-detail">
+          <i class="fa-solid fa-phone"></i>
+          <div><h4>Phone</h4><p>+233 24 000 0000</p></div>
+        </div>
+        <div class="contact-detail">
+          <i class="fa-solid fa-envelope"></i>
+          <div><h4>Email</h4><p>hello@glowhaven.com</p></div>
+        </div>
+        <div class="contact-detail">
+          <i class="fa-solid fa-clock"></i>
+          <div><h4>Opening Hours</h4><p>Mon–Fri: 9AM – 6PM<br>Saturday: 9AM – 4PM<br>Sunday: Closed</p></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:1rem;font-weight:600">
+        <i class="fa-solid fa-circle-question"></i> FAQ
+      </h3>
+      <div id="faq-list"></div>
+    </div>
+
+    <!-- Right: Contact Form -->
+    <div>
+      <div class="card">
+        <div class="card-body">
+          <h3 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:1.5rem;font-weight:600">
+            <i class="fa-solid fa-paper-plane"></i> Send a Message
+          </h3>
+          <form onsubmit="submitContact(event)" id="contact-form">
+            <div class="form-group"><label>Full Name</label><input type="text" id="ct-name" class="form-control" placeholder="James Mensah" required></div>
+            <div class="form-group"><label>Email</label><input type="email" id="ct-email" class="form-control" placeholder="your@email.com" required></div>
+            <div class="form-group">
+              <label>Subject</label>
+              <select id="ct-subject" class="form-control">
+                <option>Appointment Enquiry</option>
+                <option>Product Enquiry</option>
+                <option>Order Support</option>
+                <option>Feedback</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Message</label><textarea id="ct-message" class="form-control" placeholder="How can we help you?" required></textarea></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">
+              <i class="fa-solid fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+          <div id="ct-success" style="display:none;text-align:center;padding:2rem">
+            <i class="fa-solid fa-circle-check" style="font-size:2.5rem;color:var(--success);margin-bottom:0.75rem"></i>
+            <h3 style="font-size:1rem;margin-bottom:0.5rem">Message Sent!</h3>
+            <p style="font-size:0.875rem">Thank you for reaching out. We'll respond within 24 hours.</p>
+            <button class="btn btn-ghost" style="margin-top:1rem" onclick="resetForm()"><i class="fa-solid fa-rotate-left"></i> Send Another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  renderNavbar('contact');
+  renderFooter();
+
+  const faqs = [
+    { q: "How do I book an appointment?", a: "Go to our Book Now page, select your service, stylist, and preferred date and time. Fill in your details and confirm. You'll receive an instant confirmation." },
+    { q: "Can I cancel or reschedule?", a: "Yes. Please contact us at least 24 hours before your appointment by phone or email to reschedule or cancel." },
+    { q: "Do you offer gift cards?", a: "Yes! Digital gift cards are available. Contact us via email and we'll send you a code for any amount." },
+    { q: "How long does product delivery take?", a: "Standard delivery within Accra takes 1–3 business days. Outside Accra may take 3–5 business days." },
+    { q: "What payment methods do you accept?", a: "We accept Credit/Debit Cards, Mobile Money (MTN MoMo, Vodafone Cash, AirtelTigo), and Cash on Delivery." }
+  ];
+
+  const faqEl = document.getElementById('faq-list');
+  faqs.forEach(f => {
+    faqEl.innerHTML += `
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-question">
+        <span>${f.q}</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
+      <div class="faq-answer">${f.a}</div>
+    </div>`;
+  });
+
+  function submitContact(e) {
+    e.preventDefault();
+    const contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+    contacts.push({
+      contactId: genId('MSG'),
+      name: document.getElementById('ct-name').value,
+      email: document.getElementById('ct-email').value,
+      subject: document.getElementById('ct-subject').value,
+      message: document.getElementById('ct-message').value,
+      status: 'Unresolved',
+      submittedAt: new Date().toISOString()
+    });
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+    document.getElementById('contact-form').style.display = 'none';
+    document.getElementById('ct-success').style.display = 'block';
+  }
+
+  function resetForm() {
+    document.getElementById('contact-form').reset();
+    document.getElementById('contact-form').style.display = 'block';
+    document.getElementById('ct-success').style.display = 'none';
+  }
+</script>
+</body>
+</html>

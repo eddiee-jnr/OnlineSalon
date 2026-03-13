@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+  <div class="page-hero">
+    <span class="section-label">Your Cart</span>
+    <h1>Shopping Cart</h1>
+  </div>
+
+  <div class="cart-layout">
+    <!-- Items -->
+    <div>
+      <div id="cart-items"></div>
+    </div>
+
+    <!-- Summary -->
+    <div>
+      <div class="order-summary-card">
+        <h3><i class="fa-solid fa-receipt"></i> Order Summary</h3>
+        <div id="cart-summary"></div>
+        <a href="checkout.html" class="btn btn-primary" id="checkout-btn" style="width:100%;justify-content:center;margin-top:1rem">
+          <i class="fa-solid fa-lock"></i> Proceed to Checkout
+        </a>
+        <a href="products.html" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:0.75rem">
+          <i class="fa-solid fa-bag-shopping"></i> Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  renderNavbar('');
+  renderFooter();
+
+  function renderCart() {
+    const items = Cart.get();
+    const itemsEl = document.getElementById('cart-items');
+    const summaryEl = document.getElementById('cart-summary');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    if (items.length === 0) {
+      itemsEl.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <h3>Your cart is empty</h3>
+          <p>Browse our store and add items to your cart.</p>
+          <a href="products.html" class="btn btn-primary" style="margin-top:1rem">
+            <i class="fa-solid fa-store"></i> Shop Now
+          </a>
+        </div>`;
+      summaryEl.innerHTML = '';
+      checkoutBtn.style.display = 'none';
+      return;
+    }
+
+    checkoutBtn.style.display = 'flex';
+    itemsEl.innerHTML = items.map(item => `
+      <div class="cart-item">
+        <img class="cart-item-img" src="${item.image}" alt="${item.name}" onerror="this.style.background='var(--surface2)'">
+        <div>
+          <p class="cart-item-name">${item.name}</p>
+          <p class="cart-item-cat">${item.category}</p>
+          <div class="qty-control" style="margin-top:0.5rem">
+            <button class="qty-btn" onclick="updateQty('${item.id}', ${item.qty - 1})"><i class="fa-solid fa-minus"></i></button>
+            <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="updateQty('${item.id}', this.value)">
+            <button class="qty-btn" onclick="updateQty('${item.id}', ${item.qty + 1})"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem">
+          <span class="cart-item-price">${fmt(item.price * item.qty)}</span>
+          <span style="font-size:0.75rem;color:var(--text-muted)">${fmt(item.price)} each</span>
+          <button class="cart-item-remove" onclick="removeItem('${item.id}')"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+      </div>`).join('');
+
+    const subtotal = Cart.total();
+    const delivery = subtotal >= 50 ? 0 : 5;
+    const total = subtotal + delivery;
+    summaryEl.innerHTML = `
+      <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+      <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? '<span style="color:var(--success)">Free</span>' : fmt(delivery)}</span></div>
+      ${delivery > 0 ? `<p style="font-size:0.75rem;color:var(--text-muted)">Add ${fmt(50-subtotal)} more for free delivery</p>` : ''}
+      <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>`;
+  }
+
+  function updateQty(id, qty) {
+    Cart.updateQty(id, parseInt(qty));
+    renderCart();
+  }
+
+  function removeItem(id) {
+    Cart.remove(id);
+    renderCart();
+  }
+
+  renderCart();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — GlowHaven</title>
+  <link rel="stylesheet" href="styles/shared.css">
+  <link rel="stylesheet" href="styles/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<main>
+  <div class="page-hero">
+    <span class="section-label">Secure Checkout</span>
+    <h1>Complete Your Order</h1>
+  </div>
+
+  <div class="checkout-layout">
+    <!-- Left: Forms -->
+    <div>
+      <!-- Billing Info -->
+      <div class="checkout-section">
+        <h3><i class="fa-solid fa-location-dot"></i> Billing & Delivery</h3>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="co-fname" class="form-control" placeholder="James" required></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="co-lname" class="form-control" placeholder="Mensah" required></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="co-email" class="form-control" placeholder="your@email.com" required></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="co-phone" class="form-control" placeholder="0244 000 000" required></div>
+        <div class="form-group"><label>Delivery Address</label><input type="text" id="co-address" class="form-control" placeholder="14 Ring Road, Accra" required></div>
+        <div class="form-row">
+          <div class="form-group"><label>City</label><input type="text" id="co-city" class="form-control" placeholder="Accra" required></div>
+          <div class="form-group"><label>Region</label><input type="text" id="co-region" class="form-control" placeholder="Greater Accra"></div>
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="checkout-section">
+        <h3><i class="fa-solid fa-credit-card"></i> Payment Method</h3>
+        <div class="payment-methods">
+          <label class="payment-option">
+            <input type="radio" name="payment" value="card" checked onchange="togglePayment('card')">
+            <i class="fa-solid fa-credit-card"></i>
+            <span>Credit / Debit Card</span>
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="payment" value="momo" onchange="togglePayment('momo')">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            <span>Mobile Money</span>
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="payment" value="cod" onchange="togglePayment('cod')">
+            <i class="fa-solid fa-money-bill-wave"></i>
+            <span>Cash on Delivery</span>
+          </label>
+        </div>
+
+        <!-- Card Fields -->
+        <div class="payment-detail" id="payment-card">
+          <div class="form-group"><label>Card Number</label><input type="text" id="co-cardnum" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Expiry Date</label><input type="text" id="co-expiry" class="form-control" placeholder="MM/YY" maxlength="5"></div>
+            <div class="form-group"><label>CVV</label><input type="text" id="co-cvv" class="form-control" placeholder="123" maxlength="3"></div>
+          </div>
+          <div class="form-group"><label>Name on Card</label><input type="text" id="co-cardname" class="form-control" placeholder="JAMES MENSAH"></div>
+        </div>
+
+        <!-- MoMo Fields -->
+        <div class="payment-detail" id="payment-momo" style="display:none">
+          <div class="form-group"><label>Mobile Money Number</label><input type="tel" id="co-momo" class="form-control" placeholder="0244 000 000"></div>
+          <div class="form-group">
+            <label>Network</label>
+            <select id="co-network" class="form-control">
+              <option>MTN MoMo</option><option>Vodafone Cash</option><option>AirtelTigo Money</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- COD -->
+        <div class="payment-detail" id="payment-cod" style="display:none">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;font-size:0.875rem">
+            <i class="fa-solid fa-circle-info" style="color:var(--gold)"></i>
+            Pay in cash when your order arrives. Please have exact change ready.
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;font-size:1rem;padding:1rem" onclick="placeOrder()">
+        <i class="fa-solid fa-lock"></i> Place Order
+      </button>
+    </div>
+
+    <!-- Right: Summary -->
+    <div>
+      <div class="order-summary-card">
+        <h3><i class="fa-solid fa-receipt"></i> Order Summary</h3>
+        <div id="co-items"></div>
+        <hr class="divider">
+        <div id="co-totals"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="success-modal">
+    <div class="modal-box">
+      <i class="fa-solid fa-circle-check modal-icon"></i>
+      <h2>Order Placed!</h2>
+      <p>Thank you for your purchase. Your order is now being processed.</p>
+      <div class="order-ref">Order ID: <strong id="modal-order-id">—</strong></div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <a href="order-tracking.html" class="btn btn-primary" style="justify-content:center"><i class="fa-solid fa-truck"></i> Track Order</a>
+        <a href="index.html" class="btn btn-ghost" style="justify-content:center"><i class="fa-solid fa-house"></i> Back to Home</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/shared.js"></script>
+<script>
+  renderNavbar('');
+  renderFooter();
+
+  // Pre-fill if logged in
+  const user = Auth.getUser();
+  if (user) {
+    document.getElementById('co-fname').value = user.fullName.split(' ')[0];
+    document.getElementById('co-lname').value = user.fullName.split(' ').slice(1).join(' ');
+    document.getElementById('co-email').value = user.email;
+    document.getElementById('co-phone').value = user.phone || '';
+  }
+
+  function togglePayment(method) {
+    ['card','momo','cod'].forEach(m => {
+      document.getElementById('payment-'+m).style.display = m === method ? 'block' : 'none';
+    });
+  }
+
+  function renderSummary() {
+    const items = Cart.get();
+    document.getElementById('co-items').innerHTML = items.map(i => `
+      <div class="checkout-item-row">
+        <span>${i.name} × ${i.qty}</span>
+        <span>${fmt(i.price * i.qty)}</span>
+      </div>`).join('') || '<p style="font-size:0.85rem">No items in cart.</p>';
+    const sub = Cart.total();
+    const delivery = sub >= 50 ? 0 : 5;
+    document.getElementById('co-totals').innerHTML = `
+      <div class="summary-row"><span>Subtotal</span><span>${fmt(sub)}</span></div>
+      <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? '<span style="color:var(--success)">Free</span>' : fmt(delivery)}</span></div>
+      <div class="summary-row total"><span>Total</span><span>${fmt(sub + delivery)}</span></div>`;
+  }
+  renderSummary();
+
+  function placeOrder() {
+    if (!Auth.isLoggedIn()) {
+      showToast('<i class="fa-solid fa-lock"></i> Please login to place your order.');
+      setTimeout(() => {
+        window.location.href = 'auth.html?next=' + encodeURIComponent(window.location.pathname);
+      }, 1500);
+      return;
+    }
+
+    const fname = document.getElementById('co-fname').value.trim();
+    const email = document.getElementById('co-email').value.trim();
+    const address = document.getElementById('co-address').value.trim();
+    if (!fname || !email || !address) {
+      showToast('<i class="fa-solid fa-triangle-exclamation"></i> Please fill all required fields.'); return;
+    }
+    if (Cart.get().length === 0) {
+      showToast('<i class="fa-solid fa-triangle-exclamation"></i> Your cart is empty.'); return;
+    }
+
+    const method = document.querySelector('input[name="payment"]:checked').value;
+    const sub = Cart.total();
+    const delivery = sub >= 50 ? 0 : 5;
+    const order = {
+      orderId: genId('ORD'),
+      userId: user ? user.id : null,
+      customerName: `${fname} ${document.getElementById('co-lname').value}`.trim(),
+      email,
+      phone: document.getElementById('co-phone').value,
+      deliveryAddress: `${address}, ${document.getElementById('co-city').value}`,
+      items: Cart.get(),
+      subtotal: sub,
+      deliveryFee: delivery,
+      total: sub + delivery,
+      paymentMethod: {card:'Credit/Debit Card', momo:'Mobile Money', cod:'Cash on Delivery'}[method],
+      status: 'Processing',
+      createdAt: new Date().toISOString()
+    };
+    Orders.add(order);
+    Cart.clear();
+    document.getElementById('modal-order-id').textContent = order.orderId;
+    document.getElementById('success-modal').classList.add('show');
+  }
+</script>
+</body>
+</html>
